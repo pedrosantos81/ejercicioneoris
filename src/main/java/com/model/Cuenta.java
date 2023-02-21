@@ -18,7 +18,7 @@ import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.validation.constraints.DecimalMax;
-import javax.validation.constraints.DecimalMin;
+
 import javax.validation.constraints.NotNull;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
@@ -38,7 +38,7 @@ public class Cuenta implements Serializable {
 	@NotNull(message = "no puede ser vacia")
 	private TipoCuenta tipocuenta;
 
-	@DecimalMax("1000000.0") // @DecimalMin("1.0")
+	@DecimalMax("1000000.0") 
 	@Column(name = "saldoinicial")
 	private double saldoinicial;
 

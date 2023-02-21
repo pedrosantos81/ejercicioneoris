@@ -7,6 +7,8 @@ import java.util.Map;
 
 import javax.validation.Valid;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -22,7 +24,6 @@ import org.springframework.web.bind.annotation.RestController;
 import com.dto.ClienteCuentaMovimientosProjection;
 import com.dto.MovimientoDTO;
 import com.excepcion.ManejoCuentaExcepcion;
-import com.model.Cliente;
 import com.model.Cuenta;
 import com.model.Movimientos;
 import com.model.TipoCuenta;
@@ -35,6 +36,8 @@ import com.service.MovimientoService;
 @RestController
 public class MovimientoController {
 
+	private static final Logger log = LoggerFactory.getLogger(MovimientoController.class);
+	
 	@Autowired
 	CuentaService cuentaService;
 
@@ -53,7 +56,7 @@ public class MovimientoController {
 	public List<ClienteCuentaMovimientosProjection> findAllMovimientos(@PathVariable("id") int id,
 			@PathVariable @DateTimeFormat(pattern = "yyyy-MM-dd") Date startDate,
 			@PathVariable @DateTimeFormat(pattern = "yyyy-MM-dd") Date endDate) {
-		System.out.println(startDate.toString() + "-" + endDate.toString());
+		log.info("Movimientos de la fecha: "+startDate.toString() + "-" + endDate.toString());
 		return movimientoService.findMovimientoByClienteyFecha(id, startDate, endDate);
 	}
 	
@@ -64,11 +67,12 @@ public class MovimientoController {
 
 	@PostMapping("movimientos")
 	public ResponseEntity<?> saveMovimiento(@Valid @RequestBody MovimientoDTO movimientoDto) {
-		MovimientoDTO postResponse = null;
+		Movimientos movpost = null;
 		Map<String, Object> response = new HashMap<String, Object>();
 		Cuenta cuenta = cuentaService.getCuentaByClienteTipoCuenta(movimientoDto.getIdcliente(),
 				movimientoDto.getTipoCuenta());
 
+		log.info("--------Crea Movimiento de cuenta---------");
 		Movimientos movimientos = null;
 		try {
 			if (cuenta != null) {
@@ -83,6 +87,7 @@ public class MovimientoController {
 				} else if (movimientoDto.getTipoTransaccion() == TipoTransaccion.RETIRO) {
 
 					if (cuenta.getSaldoinicial() < movimientoDto.getValor()) {
+						log.error("Fondos insuficientes o la cantidad a retirar excede");
 						throw new ManejoCuentaExcepcion("Fondos insuficientes o la cantidad a retirar excede");
 					} else if (cuenta.getSaldoinicial() >= movimientoDto.getValor()) {
 						movimientos = new Movimientos(
@@ -95,27 +100,22 @@ public class MovimientoController {
 
 				}
 
-				Movimientos movpost = movimientoService.save(movimientos);
+				movpost = movimientoService.save(movimientos);
 
-				// convert entity to DTO
-				postResponse = new MovimientoDTO();
-				postResponse.setIdcliente(movpost.getCuentas().getClientes().getIdcliente());
-				postResponse.setTipoCuenta(cuenta.getTipocuenta());
-				postResponse.setTipoTransaccion(movimientoDto.getTipoTransaccion());
-				postResponse.setValor(movimientoDto.getValor());
-				postResponse.setSaldoaldia(cuenta.getSaldoinicial());
 			} else {
+				log.info("No se encontro idcliente ".concat(String.valueOf(movimientoDto.getIdcliente()).concat(" para realizar la transaccion.")));
 				response.put("mensaje", "No se encontro el idcliente: "
 						.concat(String.valueOf(movimientoDto.getIdcliente()).concat(" para realizar la transaccion.")));
 				return new ResponseEntity<Map<String, Object>>(response, HttpStatus.NOT_FOUND);
 			}
 		} catch (DataAccessException e) {
+			log.error("Error al realizar el insert de movimiento en la base de datos");
 			response.put("mensaje", "Error al realizar el insert de movimiento en la base de datos");
 			response.put("error", e.getMessage().concat(": ").concat(e.getMostSpecificCause().getMessage()));
 			return new ResponseEntity<Map<String, Object>>(response, HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 
-		return new ResponseEntity<MovimientoDTO>(postResponse, HttpStatus.CREATED);
+		return new ResponseEntity<Movimientos>(movpost, HttpStatus.CREATED);
 
 	}
 

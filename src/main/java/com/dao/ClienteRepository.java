@@ -5,11 +5,10 @@ import java.util.Optional;
 
 import javax.transaction.Transactional;
 
-import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.query.Param;
+
 
 import com.dto.ClienteCuentaProjection;
 import com.dto.ClienteProjection;
@@ -31,7 +30,6 @@ public interface ClienteRepository extends JpaRepository<Cliente, Integer>{
 	
 	static String queryUpdaCliente ="update Cliente c set c.nombre=:nombre"
 			+ ", c.genero=:genero"
-			//+ ", c.identificacion=:identificacion"
 			+ ", c.direccion=:direcion"
 			+ ", c.telefono=:telefono"
 			+ ", c.edad=:edad"
@@ -45,13 +43,10 @@ public interface ClienteRepository extends JpaRepository<Cliente, Integer>{
 	public List<ClienteProjection> getNombreClienteProjection();
 	
 	@Query("select c from Cliente c where c.idcliente=:idcliente and c.estado=1")
-	public Optional<Cliente> findById(int idcliente);
+	public Optional<Cliente> findByIdCliente(int idcliente);
 	
 	@Query("select c from Cliente c where c.idpersona=:id")
 	public Optional<Cliente> findByIdPersona(int id);
-	
-	@Query("select c from Cliente c where c.idpersona=:id")
-	public Optional<Cliente> findByIdPersonaCliente(int id);
 	
 	@Query("select a.numerocuenta as numerocuenta, c.idcliente as idcliente, "
 		  + "a.saldoinicial as saldoinicial, a.tipocuenta as tipocuenta, "
@@ -61,15 +56,6 @@ public interface ClienteRepository extends JpaRepository<Cliente, Integer>{
     
     @Query("from Cliente ")
     public List<Cliente> findAllClientes();
-    
-    @Modifying
-    @Transactional
-    @Query(value = queryUpdaCliente)
-    void actualizaCliente(@Param("id") int id,@Param("nombre") String nombre,@Param("genero") String genero,
-    		//@Param("nombre") String identificacion,
-    		@Param("telefono") String telefono,
-    		@Param("edad") int edad,
-    		@Param("pass") String pass);
     
     @Modifying
     @Transactional

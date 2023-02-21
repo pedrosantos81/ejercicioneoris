@@ -1,7 +1,6 @@
 package com.excepcion;
 
-import java.io.PrintStream;
-import java.io.PrintWriter;
+
 
 public class ManejoCuentaExcepcion extends RuntimeException {
 

@@ -40,6 +40,7 @@ public class Movimientos {
 	private double saldo;
 	
 	@Column(name="idCuenta",insertable = false,updatable = false)
+	@JsonIgnore
 	private int idcuenta;
 	
 	@ManyToOne

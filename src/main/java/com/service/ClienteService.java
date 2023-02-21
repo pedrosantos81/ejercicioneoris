@@ -11,14 +11,12 @@ import com.model.TipoIdentificacion;
 
 public interface ClienteService {
 
-	Cliente createCliente(Cliente cliente);
-	Cliente updateCliente(Cliente cliente);
+	Cliente createOrUpdateCliente(Cliente cliente);
 	List<Cliente> findAllClientes();
 	void delete(int id);
 	List<ClienteProjection> getNombreClienteProjection();
-	Cliente findById(int id);
+	Cliente findByIdCliente(int idcliente);
 	Cliente findByIdPersona(int id);
-	Cliente findByIdPersonaCliente(int id);
 	List<ClienteCuentaProjection> findCuentasByIdPersona(int id);
 	List<TipoIdentificacion> findAllTipoIdentificacion();
 

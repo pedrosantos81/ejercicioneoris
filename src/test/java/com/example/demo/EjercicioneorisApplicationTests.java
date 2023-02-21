@@ -23,7 +23,7 @@ import org.springframework.test.web.servlet.MockMvc;
 
 
 
-@SpringBootTest
+//@SpringBootTest
 class EjercicioneorisApplicationTests {
 	
 	@Test

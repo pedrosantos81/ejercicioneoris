@@ -1,8 +1,5 @@
 package com.dto;
 
-import javax.validation.constraints.NotEmpty;
-import javax.validation.constraints.NotNull;
-
 import com.model.TipoCuenta;
 import com.model.TipoTransaccion;
 

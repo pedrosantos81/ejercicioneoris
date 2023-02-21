@@ -4,6 +4,9 @@ import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 import javax.transaction.Transactional;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import com.dao.ClienteRepository;
@@ -16,39 +19,44 @@ import com.model.TipoIdentificacion;
 @Service
 public class ClienteServiceImpl implements ClienteService {
 
+	private static final Logger log = LoggerFactory.getLogger(ClienteServiceImpl.class);
+	
 	@Autowired
 	ClienteRepository clienteRepository;
 
 	@Override
-	public Cliente createCliente(Cliente cliente) {
-		return clienteRepository.save(cliente);
-	}
-
-	@Override
-	public Cliente updateCliente(Cliente cliente) {
+	@Transactional
+	public Cliente createOrUpdateCliente(Cliente cliente) {
 		return clienteRepository.save(cliente);
 	}
 
 	@Override
 	public List<ClienteProjection> getNombreClienteProjection() {
-		return clienteRepository.getNombreClienteProjection();
+		List<ClienteProjection> lista = clienteRepository.getNombreClienteProjection();
+		if(lista.isEmpty()) {
+			log.debug("Lista vacia");
+			throw new ClienteNotFound("Lista vacia");
+		}
+		return lista;
 	}
 
 	@Override
-	public Cliente findById(int id) {
-		Optional<Cliente> result = clienteRepository.findById(id);
+	public Cliente findByIdCliente(int idcliente) {
+		Optional<Cliente> result = clienteRepository.findByIdCliente(idcliente);
 
 		Cliente cliente = null;
 		if (result.isPresent()) {
 			cliente = result.get();
 		}
 		else {
-			throw new ClienteNotFound("No se encontro o esta dado de baja idcliente: "+id);
+			log.debug("No se encontro o esta dado de baja idcliente: "+idcliente);
+			throw new ClienteNotFound("No se encontro o esta dado de baja idcliente: "+idcliente);
 		}
 		return cliente;
 	}
 
 	@Override
+	@Transactional
 	public void delete(int id) {
 		clienteRepository.delete(id);
 	}
@@ -61,6 +69,7 @@ public class ClienteServiceImpl implements ClienteService {
 		if (result.isPresent()) {
 			cliente = result.get();
 		} else {
+			log.debug("No se encontro el cliente: "+id);
 			throw new NoSuchElementException("No se encontro el cliente: " + id );
 		}
 		return cliente;
@@ -73,6 +82,7 @@ public class ClienteServiceImpl implements ClienteService {
 
 		List<ClienteCuentaProjection> lista = null;
 		if (result.get().size() < 1) {
+			log.debug("No se encontro el cliente: "+id);
 			throw new ClienteNotFound("No se encontro el cliente :" + id);
 		} else {
 			lista = result.get();
@@ -80,23 +90,7 @@ public class ClienteServiceImpl implements ClienteService {
 		return lista;
 	}
 
-	
-
 	@Override
-	public Cliente findByIdPersonaCliente(int id) {
-		Optional<Cliente> result = clienteRepository.findByIdPersonaCliente(id);
-
-		Cliente cliente = null;
-		if (result.isPresent()) {
-			cliente = result.get();
-		} else {
-			throw new ClienteNotFound("No se hallo cliente " + id);
-		}
-		return cliente;
-	}
-
-	@Override
-	@Transactional
 	public List<TipoIdentificacion> findAllTipoIdentificacion() {
 		return clienteRepository.findAllTipoIdentificacion();
 	}

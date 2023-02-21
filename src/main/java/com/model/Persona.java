@@ -72,17 +72,11 @@ public abstract class Persona {
 	}
 
 	public Persona() {
-
 	}
-	
-	
 
 	public Persona(@NotEmpty @Size(min = 4, message = "El tamaño debe ser mayor a 4 caracteres") String nombre,
-			@NotNull(message = "no puede ser vacia") Genero genero, 
-			@Min(18) int edad, 
-			@NotEmpty String direccion,
-			@NotEmpty String telefono,
-			@NotNull(message = "no puede ser vacia") TipoIdentificacion tipoIdentificacion) {
+			@NotNull(message = "no puede ser vacia") Genero genero, @Min(18) int edad, @NotEmpty String direccion,
+			@NotEmpty String telefono, @NotNull(message = "no puede ser vacia") TipoIdentificacion tipoIdentificacion) {
 		super();
 		this.nombre = nombre;
 		this.genero = genero;

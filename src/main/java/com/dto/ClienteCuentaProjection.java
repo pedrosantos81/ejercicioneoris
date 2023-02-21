@@ -1,7 +1,5 @@
 package com.dto;
 
-import java.util.Date;
-
 public interface ClienteCuentaProjection {
 	
 	String getNumerocuenta();

@@ -6,6 +6,8 @@ import java.util.Map;
 
 import javax.validation.Valid;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
 import org.springframework.http.HttpStatus;
@@ -31,14 +33,11 @@ import com.service.ClienteService;
 @RestController
 @Validated
 public class ClienteController {
+	
+	private static final Logger log = LoggerFactory.getLogger(ClienteController.class);
 
 	@Autowired
 	ClienteService clienteService;
-	
-//	@Autowired
-//	public ClienteController(ClienteService clienteService) {
-//		this.clienteService=clienteService;
-//	}
 
 	@GetMapping("/clientes")
 	public List<Cliente> findAllClientes(){
@@ -49,8 +48,9 @@ public class ClienteController {
 	public ResponseEntity<?> show(@PathVariable int idcliente) {
 		Cliente cliente=null;
 		Map <String,Object> response = new HashMap<>();
+		log.info("-----Obtiene cliente----");
 		try {
-			cliente = clienteService.findById(idcliente);
+			cliente = clienteService.findByIdCliente(idcliente);
 		}catch(DataAccessException d) {
 			response.put("mensaje", "Error al consultar la bd.");
 			response.put("error", d.getMessage().concat(": ").concat(d.getMostSpecificCause().getMessage()));
@@ -64,15 +64,15 @@ public class ClienteController {
 	public ResponseEntity<?> create(@Valid @RequestBody Cliente cliente){
 		Cliente clienteNew = null;
 		Map<String, Object> response = new HashMap<>();
-
+        log.info("-----Entro a crear cliente----");
 		try {
 			cliente.setEstado(true);
-			clienteNew = clienteService.createCliente(cliente);
+			clienteNew = clienteService.createOrUpdateCliente(cliente);
 		}catch(DataAccessException e) {
+			log.error(e.getMessage().concat(": ").concat(e.getMostSpecificCause().getMessage()));
 			response.put("mensaje", "Error al realizar el insert en la base de datos");
 			response.put("error", e.getMessage().concat(": ").concat(e.getMostSpecificCause().getMessage()));
 			return new ResponseEntity<Map<String, Object>>(response, HttpStatus.INTERNAL_SERVER_ERROR);
-
 		}
 		
 		response.put("mensaje", "El cliente ha sido creado con éxito!");
@@ -84,16 +84,11 @@ public class ClienteController {
 	public List<ClienteProjection> getClientesporcampo() {
 		return clienteService.getNombreClienteProjection();
 	}
-
-	@GetMapping(value = "clientes/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
-	public Cliente getClienteandCuentas(@PathVariable int id) {
-		return clienteService.findByIdPersonaCliente(id);
-	}
 	
 	@DeleteMapping("clientes/{id}")
 	@ResponseStatus(HttpStatus.NO_CONTENT)
 	public void deletePost(@PathVariable("id") int id) {
-
+		log.info("------Entro a borrar cliente------".concat(String.valueOf(id)));
 		Cliente cliente = clienteService.findByIdPersona(id);
 
 		clienteService.delete(cliente.getId());
@@ -104,9 +99,11 @@ public class ClienteController {
 		Cliente clienteActual = clienteService.findByIdPersona(id);
 		Cliente clientepost = null;
 		Map<String,Object> response = new HashMap<>();
+		log.info("------Entro a actualizar cliente------".concat(String.valueOf(id)));
 		
 		if(clienteActual==null)
 		{
+			log.error("Error: No se pudo editar el cliente ID:".concat(String.valueOf(id).concat(" no existe en la bd.")));
 			response.put("mensaje", "Error: No se pudo editar el cliente ID:".concat(String.valueOf(id).concat(" no existe en la bd.")));
 			return new ResponseEntity<Map<String,Object>>(response,HttpStatus.NOT_FOUND);
 		}
@@ -121,9 +118,10 @@ public class ClienteController {
 			clienteActual.setEstado(true);
 			clienteActual.setPass(cliente.getPass());
 			clienteActual.setTipoIdentificacion(cliente.getTipoIdentificacion());
-			clientepost = clienteService.updateCliente(clienteActual);
+			clientepost = clienteService.createOrUpdateCliente(clienteActual);
 			
 		}catch(DataAccessException dexc) {
+			log.error("No se pudo actualizar la bd");
 			response.put("message", dexc.getMessage().concat(": ").concat(dexc.getMostSpecificCause().getMessage()));
 			response.put("error","No se pudo actualizar la bd");
 			new ResponseEntity<Map<String,Object>>(response,HttpStatus.INTERNAL_SERVER_ERROR);

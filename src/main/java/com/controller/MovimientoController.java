@@ -62,6 +62,7 @@ public class MovimientoController {
 	
 	@GetMapping("movimientos/{idcliente}/{tipocuenta}")
 	public List<ClienteCuentaMovimientosProjection> findAllMovimientosByCliente(@PathVariable int idcliente,@PathVariable String tipocuenta) {
+		log.info("-----Obtiene movimientos por cliente y tipocuenta------");
 		return movimientoService.findAllMovimientosByCliente(idcliente, TipoCuenta.valueOf(tipocuenta));
 	}
 
@@ -101,7 +102,7 @@ public class MovimientoController {
 				}
 
 				movpost = movimientoService.save(movimientos);
-
+				log.info("---Se creo movimiento---");
 			} else {
 				log.info("No se encontro idcliente ".concat(String.valueOf(movimientoDto.getIdcliente()).concat(" para realizar la transaccion.")));
 				response.put("mensaje", "No se encontro el idcliente: "

@@ -47,6 +47,7 @@ public class CuentaController {
 	
 	@GetMapping("cuentas/{idcliente}")
 	public List<Cuenta> findCuentasByIdCliente(@PathVariable int idcliente){
+		log.info("----Obtiene cuentas por cliente---");
 		return cuentaService.getCuentasByCliente(idcliente);
 	}
 

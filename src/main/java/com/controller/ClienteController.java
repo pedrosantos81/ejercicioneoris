@@ -41,6 +41,7 @@ public class ClienteController {
 
 	@GetMapping("/clientes")
 	public List<Cliente> findAllClientes(){
+		log.info("Obtiene todos los clientes");
 		return clienteService.findAllClientes();
 	}
 	
@@ -52,6 +53,7 @@ public class ClienteController {
 		try {
 			cliente = clienteService.findByIdCliente(idcliente);
 		}catch(DataAccessException d) {
+			log.error("Error al consultar informacion en bd");
 			response.put("mensaje", "Error al consultar la bd.");
 			response.put("error", d.getMessage().concat(": ").concat(d.getMostSpecificCause().getMessage()));
 			return new ResponseEntity<Map<String,Object>>(response,HttpStatus.INTERNAL_SERVER_ERROR);
@@ -75,6 +77,7 @@ public class ClienteController {
 			return new ResponseEntity<Map<String, Object>>(response, HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 		
+		log.info("El cliente ha sido creado con éxito!");
 		response.put("mensaje", "El cliente ha sido creado con éxito!");
 		response.put("cliente", clienteNew);
 		return new ResponseEntity<Map<String, Object>>(response, HttpStatus.CREATED);
@@ -127,6 +130,7 @@ public class ClienteController {
 			new ResponseEntity<Map<String,Object>>(response,HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 		
+		log.info("El cliente se actualizo con exito");
 		response.put("message", "El cliente se actualizo con exito");
 		response.put("cliente", clientepost);
 
